@@ -1,0 +1,106 @@
+// 🚀 AI COO BACKEND - COMPLETE BUSINESS ENGINE
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// 🧠 Generate REALISTIC Business Data (8 Projects)
+function generateBusinessData() {
+  const projectNames = [
+    'Q1 Product Launch', 'Sales CRM', 'AI Analytics', 'Mobile App v2',
+    'Cloud Migration', 'Marketing Platform', 'HR Dashboard', 'E-commerce'
+  ];
+  
+  return projectNames.map((name, i) => {
+    const budget = (Math.random() * 350 + 75) * 1000; // $75K-$425K
+    const daysTotal = 30 + Math.floor(Math.random() * 90);
+    const daysUsed = Math.floor(daysTotal * (0.3 + Math.random() * 0.6));
+    const burnRate = budget / daysTotal * (0.85 + Math.random() * 0.5);
+    
+    return {
+      name,
+      budget: Math.round(budget),
+      spent: Math.round(burnRate * daysUsed),
+      projected: Math.round(burnRate * daysTotal),
+      days_total: daysTotal,
+      days_used: daysUsed,
+      team_size: 3 + Math.floor(Math.random() * 12),
+      health: Math.max(0, Math.round(100 - (Math.random() * 60))),
+      risk: Math.random() > 0.7 ? 'CRITICAL' : Math.random() > 0.5 ? 'HIGH' : 'OK'
+    };
+  });
+}
+
+// 📊 AI Analysis Engine
+app.get('/api/analyze', (req, res) => {
+  const data = generateBusinessData();
+  
+  // Calculate insights
+  const totalBudget = data.reduce((sum, p) => sum + p.budget, 0);
+  const totalProjected = data.reduce((sum, p) => sum + p.projected, 0);
+  const avgHealth = data.reduce((sum, p) => sum + p.health, 0) / data.length;
+  const criticalCount = data.filter(p => p.risk === 'CRITICAL').length;
+  
+  const insights = [];
+  if (totalProjected > totalBudget * 1.15) {
+    insights.push('🚨 Budget overrun risk: +15% projected vs budget');
+  }
+  if (criticalCount > 1) {
+    insights.push(`⚠️ ${criticalCount} CRITICAL projects need attention`);
+  }
+  
+  res.json({
+    success: true,
+    timestamp: new Date().toISOString(),
+    portfolio: {
+      total_budget: totalBudget,
+      total_projected: totalProjected,
+      budget_variance: ((totalProjected - totalBudget) / totalBudget * 100).toFixed(1),
+      avg_health: Math.round(avgHealth),
+      critical_projects: criticalCount,
+      total_projects: data.length
+    },
+    projects: data,
+    insights: insights,
+    recommendations: [
+      'Reallocate budget from low-health projects',
+      'Review team allocation for critical projects',
+      'Implement weekly burn rate monitoring'
+    ]
+  });
+});
+
+// 🧪 Scenario Simulator
+app.post('/api/simulate', (req, res) => {
+  const baseData = generateBusinessData()[0];
+  const scenario = req.body.scenario;
+  
+  let simulated = { ...baseData };
+  if (scenario === 'hire_2') {
+    simulated.team_size += 2;
+    simulated.projected *= 1.25;
+    simulated.health -= 15;
+  } else if (scenario === 'delay_30') {
+    simulated.days_total += 30;
+    simulated.projected *= 1.15;
+    simulated.health -= 10;
+  }
+  
+  res.json({
+    before: baseData,
+    after: simulated,
+    impact: {
+      cost_increase: simulated.projected - baseData.projected,
+      health_change: simulated.health - baseData.health
+    }
+  });
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`🚀 AI COO Backend: http://localhost:${PORT}`);
+});
